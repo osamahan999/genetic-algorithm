@@ -29,7 +29,7 @@ void haveChildren();
 double getError(int popNum);
 void calculatePopulationWeights();
 double algorithmInitialization();
-void bestMutationChance(int runsToGetAvg);
+void bestMutationChance(int runsToGetAvg, char filename[]);
 void populationWeightTopIndividuals();
 void pushArrayDownOneIndex(individual *topIndividual, int pushDownAmt);
 
@@ -44,10 +44,6 @@ individual *parents[NUM_OF_POPULATION * 2];
 int main()
 {
 
-    // printf("time %f\n", algorithmInitialization());
-
-    bestMutationChance(50);
-
     //dealloc
     for (int i = 0; i < NUM_OF_POPULATION; i++)
         free(initialPopulation[i]);
@@ -55,13 +51,14 @@ int main()
 
 /**
  * Runs through a bunch of mutation chances to find best mutation chance with the current crossover function 
+ * Takes in the amt of runs to get the average, and a string filename like text.txt to write to
 */
-void bestMutationChance(int runsToGetAvg)
+void bestMutationChance(int runsToGetAvg, char filename[])
 {
     int bestMutationChance, initialMutationChance = MUTATION_CHANCE;
 
     FILE *fp;
-    fp = fopen("nonthreaded.txt", "w");
+    fp = fopen(filename, "w");
 
     if (fp == NULL)
         exit(1);

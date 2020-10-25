@@ -332,25 +332,22 @@ void printArr(double arr[])
         printf("%f\n", arr[i]);
 }
 
+//OKAY DONT LAUGH. This is selection sort which is n^2 because i didnt want to go through the trouble of writing quicksort for an array of individuals
 void sortPopulationByWeight()
 {
-    for (int i = 0; i < NUM_OF_POPULATION; i++)
-    {
-        printf("%d %f \n", i, population[i]->weight);
-    }
-
-    qsort(&parents[0], NUM_OF_POPULATION, sizeof(individual *), cmpfunc);
 
     for (int i = 0; i < NUM_OF_POPULATION; i++)
     {
-        printf("%d %f \n", i, population[i]->weight);
+        int minIndex = i;
+
+        for (int j = i + 1; j < NUM_OF_POPULATION; j++)
+        {
+            if (population[j]->weight < population[minIndex]->weight)
+                minIndex = j;
+        }
+
+        individual *p = population[i];
+        population[i] = population[minIndex];
+        population[minIndex] = p;
     }
-}
-
-int cmpfunc(const void *a, const void *b)
-{
-    individual *personA = (individual *)a;
-    individual *personB = (individual *)b;
-
-    return (int)((personA->weight) * 100 - (personB->weight) * 100);
 }

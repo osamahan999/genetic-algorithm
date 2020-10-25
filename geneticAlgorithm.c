@@ -1,10 +1,10 @@
 #define _GNU_SOURCE
-#define NUM_OF_POPULATION 100
-#define NUM_OF_FITNESS_INDICES 3
-#define NUM_OF_GENS 200
+#define NUM_OF_POPULATION 500
+#define NUM_OF_FITNESS_INDICES 1
+#define NUM_OF_GENS 2000
 #define NUM_OF_PARENTS (2 * NUM_OF_POPULATION) //amt of parents each child has
 #define AMT_OF_ERROR_PER_INDICE 100            //with our # range going from 0 to 100,000, a 100 error per indice means 1/1000 error
-#define TOP_X 10
+#define TOP_X 500
 
 #include <stdio.h>
 #include <math.h>
@@ -34,8 +34,9 @@ void populationWeightTopIndividuals();
 void pushArrayDownOneIndex(individual *topIndividual, int pushDownAmt);
 int cmpfunc(const void *a, const void *b);
 void sortPopulationByWeight();
+void parentFuncByWeight();
 
-int MUTATION_CHANCE = 92; // mutation_chance% based on a 200 sample size analysis of runtimes for 1 indice populations
+int MUTATION_CHANCE = 80; // mutation_chance% based on a 200 sample size analysis of runtimes for 1 indice populations
 
 double bestFit[NUM_OF_FITNESS_INDICES];
 individual *population[NUM_OF_POPULATION];
@@ -46,16 +47,13 @@ individual *parents[NUM_OF_POPULATION * 2];
 int main()
 {
 
-    algorithmInitialization();
-
-    sortPopulationByWeight();
-
+    bestMutationChance(50, "top10parents.txt");
     //dealloc
     for (int i = 0; i < NUM_OF_POPULATION; i++)
         free(initialPopulation[i]);
 }
 
-/**    // bestMutationChance(50, "twoIndices.txt");
+/**    
  * Runs through a bunch of mutation chances to find best mutation chance with the current crossover function 
  * Takes in the amt of runs to get the average, and a string filename like text.txt to write to
 */
@@ -342,12 +340,78 @@ void sortPopulationByWeight()
 
         for (int j = i + 1; j < NUM_OF_POPULATION; j++)
         {
-            if (population[j]->weight < population[minIndex]->weight)
+            if (population[j]->weight > population[minIndex]->weight)
                 minIndex = j;
         }
 
         individual *p = population[i];
         population[i] = population[minIndex];
         population[minIndex] = p;
+    }
+}
+
+void parentFuncByWeight()
+{
+
+    calculatePopulationWeights(); //calculate new population weights
+    sortPopulationByWeight();     //sort the pop by weight
+
+    double sum = 0;
+    for (int i = 0; i < TOP_X; i++)
+    {
+        sum += population[i]->weight;
+    }
+    struct timeval time;
+    int t;
+
+    double tempSum; //used to keep track of which parent we're choosing
+
+    for (int parent = 0; parent < NUM_OF_PARENTS; parent++)
+    {
+
+        gettimeofday(&time, NULL);
+        t = time.tv_usec;
+        tempSum = 0; //sum of weights to find which parent to use
+
+        double newParent = ((double)(rand_r(&t) % 100000)) / 100000; //0 to 999999 because our random doubles go to 0 to 100,000
+
+        for (int j = 0; j < TOP_X; j++)
+        {
+            tempSum += (population[j]->weight / sum);
+
+            if (newParent < tempSum)
+            {
+                parents[parent] = population[j];
+
+                break;
+            }
+        }
+    }
+
+    for (int parent = 0; parent < NUM_OF_PARENTS; parent++)
+    {
+
+        int mutationChance;
+
+        for (int i = 0; i < NUM_OF_FITNESS_INDICES; i++)
+        {
+            gettimeofday(&time, NULL);
+            t = time.tv_usec;
+
+            mutationChance = rand_r(&t) % 100;
+            if (mutationChance >= (100 - MUTATION_CHANCE)) //20% chance = 100 - 20
+            {
+
+                //50% chance to double, or 50% to half
+                gettimeofday(&time, NULL);
+                t = time.tv_usec;
+                int binaryMutator = (rand_r(&t) % 2);
+
+                if (binaryMutator == 0)
+                    parents[parent]->fitness[i] *= 1.1; //increase it
+                else
+                    parents[parent]->fitness[i] *= .9; //decrease it
+            }
+        }
     }
 }

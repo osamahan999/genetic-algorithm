@@ -3,6 +3,11 @@ graph of mutation chance vs average time unthreaded
 https://docs.google.com/spreadsheets/d/18JoG38uJAAS2BCCCijN2On5PhXasAX27DEHTAxk79vY/edit#gid=0
 
 
+This code has been refactored from my multithreaded genetic algorithm repo https://github.com/osamahan999/multithreaded-genetic-algorithm
+I made this repo simply to see the different in speed between the multithreaded and a single threaded genetic algorithm, and unsurprisingly, 
+the single threaded repo was way faster. I was making way too many threads, which I knew was not great, but I still wanted to do just to learn
+how to use threading! 
+
 
 Compile using gcc -o geneticAlgorithm geneticAlgorithm.c  
 
@@ -19,6 +24,10 @@ I chose this large number because I wanted a lot of variation in the numbers, an
 This is done without multithreading to compare to the multithreaded version
 
 3. Then, utilizing a weighing function, I check to see which populations have the best value based on their errors. The weighing function then tells us a % that we should give to each population for a weighted random parent-choosing process. 
+
+I also implemented a TOP_X parent choosing process. This only weighs the top X amout of individuals, and picks parents from those. 
+I implemented this by using seleciton sort because i was lazy and didnt want to implement qsort, and found that its much slower. Much much
+slower, such that even if I were using qsort which is a factor faster, would not make a difference. 
 
 4. Utilize the weights to pseudo randomly decide the parents, and then have them have children using a crossover function
 What this crossover function does is it chooses a gene from each parents and flips a coin for which one goes into the child.
